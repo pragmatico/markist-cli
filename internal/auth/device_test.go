@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/api"
 )
 
 // --- RequestDeviceCode ---

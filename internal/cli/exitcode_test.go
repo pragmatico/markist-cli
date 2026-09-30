@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jmbataller/markist/cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/api"
 )
 
 func TestExitCodeForError(t *testing.T) {

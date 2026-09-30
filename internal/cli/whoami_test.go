@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/api"
-	"github.com/jmbataller/markist/cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/config"
 )
 
 func TestWhoamiNotLoggedIn(t *testing.T) {

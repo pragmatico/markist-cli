@@ -12,8 +12,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/config"
-	"github.com/jmbataller/markist/cli/internal/version"
+	"github.com/pragmatico/markist-cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/version"
 )
 
 // DefaultBaseURL is the fallback when no --api-url flag, MARKIST_API_URL

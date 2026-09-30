@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jmbataller/markist/cli/internal/version"
+	"github.com/pragmatico/markist-cli/internal/version"
 )
 
 func newVersionCommand() *cobra.Command {

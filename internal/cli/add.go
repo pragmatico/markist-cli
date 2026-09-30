@@ -13,8 +13,8 @@ import (
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 
-	"github.com/jmbataller/markist/cli/internal/api"
-	"github.com/jmbataller/markist/cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/config"
 )
 
 // errAddFailed is returned when at least one URL failed to save, after every

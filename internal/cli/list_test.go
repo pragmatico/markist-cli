@@ -10,7 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jmbataller/markist/cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/api"
 )
 
 func newTestListCommand() *cobra.Command {

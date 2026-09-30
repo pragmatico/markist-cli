@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/jmbataller/markist/cli/internal/ui"
+	"github.com/pragmatico/markist-cli/internal/ui"
 )
 
 func main() {

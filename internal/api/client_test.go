@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/config"
 )
 
 func withConfigDir(t *testing.T) string {

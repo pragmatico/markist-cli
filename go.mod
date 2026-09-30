@@ -1,4 +1,4 @@
-module github.com/jmbataller/markist/cli
+module github.com/pragmatico/markist-cli
 
 go 1.25
 

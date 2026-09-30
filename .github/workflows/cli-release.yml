@@ -1,17 +1,14 @@
 name: CLI Release
 
-# Triggered by pushing the Go module tag `cli/vX.Y.Z` (required for
-# `go install .../cli/cmd/markist@vX.Y.Z` to resolve a module living in a
-# repo subdirectory). GoReleaser OSS expects a bare semver tag with no
-# monorepo support, so this job mirrors the pushed tag onto a real, bare
-# `vX.Y.Z` tag on the same commit and drives GoReleaser off that instead --
-# see the top of cli/.goreleaser.yaml and cli/README.md for why the
-# alternative (pointing GoReleaser straight at the prefixed tag via env
-# vars) does not work.
+# Runs in the public pragmatico/markist-cli repo, which receives this folder
+# from the private monorepo's sync workflow. The Go module lives at that
+# repo's root, so a bare `vX.Y.Z` tag is both the Go module version
+# (`go install github.com/pragmatico/markist-cli/cmd/markist@vX.Y.Z`) and the
+# semver tag GoReleaser releases from -- no tag mirroring needed.
 on:
   push:
     tags:
-      - "cli/v*"
+      - "v*"
 
 permissions:
   contents: write
@@ -30,37 +27,12 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Derive release tags
-        id: tags
-        working-directory: .
-        run: |
-          set -euo pipefail
-
-          cli_tag="${GITHUB_REF_NAME}"
-          version="${cli_tag#cli/v}"
-          release_tag="v${version}"
-
-          if ! git rev-parse -q --verify "refs/tags/${release_tag}" >/dev/null; then
-            git tag "${release_tag}" "${cli_tag}"
-            git push origin "refs/tags/${release_tag}"
-          fi
-
-          # Bare vX.Y.Z tags only -- "cli/vX.Y.Z" never matches this glob, so
-          # it can't be picked up as a false "previous" release here.
-          previous_tag="$(git tag --list 'v[0-9]*' --sort=-v:refname | grep -v -x -F "${release_tag}" | head -n1 || true)"
-
-          echo "current_tag=${release_tag}" >> "$GITHUB_OUTPUT"
-          echo "previous_tag=${previous_tag}" >> "$GITHUB_OUTPUT"
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: "~> v2"
           args: release --clean
-          workdir: .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          GORELEASER_CURRENT_TAG: ${{ steps.tags.outputs.current_tag }}
-          GORELEASER_PREVIOUS_TAG: ${{ steps.tags.outputs.previous_tag }}

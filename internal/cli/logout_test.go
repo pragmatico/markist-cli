@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jmbataller/markist/cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/config"
 )
 
 func TestLogoutNotLoggedIn(t *testing.T) {

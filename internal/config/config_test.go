@@ -56,7 +56,7 @@ func TestSaveThenLoadRoundTrips(t *testing.T) {
 		},
 		Update: Update{
 			LastCheckedAt: "2026-01-01T00:00:00Z",
-			LatestSeen:    "cli/v0.2.0",
+			LatestSeen:    "0.2.0",
 		},
 	}
 

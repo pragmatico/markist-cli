@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/config"
-	"github.com/jmbataller/markist/cli/internal/ui"
-	"github.com/jmbataller/markist/cli/internal/update"
-	"github.com/jmbataller/markist/cli/internal/version"
+	"github.com/pragmatico/markist-cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/ui"
+	"github.com/pragmatico/markist-cli/internal/update"
+	"github.com/pragmatico/markist-cli/internal/version"
 )
 
 // updateHTTPClient, updateAPIBaseURL and updateIsInteractive are test seams
@@ -24,9 +24,9 @@ var (
 )
 
 // releasesURL is where printUpdateNotice points the user for the actual
-// download -- Task 15's packaged installers land later, so this is the one
-// stable link in the meantime.
-const releasesURL = "https://github.com/jmbataller/markist/releases"
+// download: the public repo's GitHub Releases, which also back the install
+// scripts and the Homebrew cask.
+const releasesURL = "https://github.com/pragmatico/markist-cli/releases"
 
 // shouldRunUpdateCheck applies Task 14's skip/cadence rules: --json, a
 // non-interactive stdout, MARKIST_NO_UPDATE_CHECK, CI, or a check within the

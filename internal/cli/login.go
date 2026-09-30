@@ -10,10 +10,10 @@ import (
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 
-	"github.com/jmbataller/markist/cli/internal/api"
-	"github.com/jmbataller/markist/cli/internal/auth"
-	"github.com/jmbataller/markist/cli/internal/config"
-	"github.com/jmbataller/markist/cli/internal/ui"
+	"github.com/pragmatico/markist-cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/auth"
+	"github.com/pragmatico/markist-cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/ui"
 )
 
 // openBrowser and confirmAgain are seams over pkg/browser and ui.Confirm:

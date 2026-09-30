@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/config"
 )
 
 // ErrSessionExpired is returned when the refresh token itself has been

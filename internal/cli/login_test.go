@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/api"
-	"github.com/jmbataller/markist/cli/internal/auth"
-	"github.com/jmbataller/markist/cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/auth"
+	"github.com/pragmatico/markist-cli/internal/config"
 )
 
 // stubOpenBrowser replaces the openBrowser seam for the duration of the

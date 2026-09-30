@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/config"
-	"github.com/jmbataller/markist/cli/internal/update"
-	"github.com/jmbataller/markist/cli/internal/version"
+	"github.com/pragmatico/markist-cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/update"
+	"github.com/pragmatico/markist-cli/internal/version"
 )
 
 // stubCurrentVersion overrides version.Version (normally "dev" unless
@@ -122,7 +122,7 @@ func releaseServer(t *testing.T, body string) *httptest.Server {
 
 func TestStartUpdateCheckSkippedNonInteractive(t *testing.T) {
 	withConfigDir(t)
-	server := releaseServer(t, `[{"tag_name":"cli/v9.9.9"}]`)
+	server := releaseServer(t, `[{"tag_name":"v9.9.9"}]`)
 	stubUpdateSeams(t, server.Client(), server.URL, false)
 
 	result := <-startUpdateCheck(t.Context())
@@ -134,7 +134,7 @@ func TestStartUpdateCheckSkippedNonInteractive(t *testing.T) {
 func TestStartUpdateCheckFindsUpdate(t *testing.T) {
 	withConfigDir(t)
 	stubCurrentVersion(t, "0.1.0")
-	server := releaseServer(t, `[{"tag_name":"cli/v9.9.9"}]`)
+	server := releaseServer(t, `[{"tag_name":"v9.9.9"}]`)
 	stubUpdateSeams(t, server.Client(), server.URL, true)
 
 	result := <-startUpdateCheck(t.Context())
@@ -164,7 +164,7 @@ func TestStartUpdateCheckRespectsCadence(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls++
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`[{"tag_name":"cli/v9.9.9"}]`))
+		_, _ = w.Write([]byte(`[{"tag_name":"v9.9.9"}]`))
 	}))
 	t.Cleanup(server.Close)
 	stubUpdateSeams(t, server.Client(), server.URL, true)

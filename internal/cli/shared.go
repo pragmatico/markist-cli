@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jmbataller/markist/cli/internal/api"
-	"github.com/jmbataller/markist/cli/internal/config"
-	"github.com/jmbataller/markist/cli/internal/ui"
+	"github.com/pragmatico/markist-cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/ui"
 )
 
 // nowFunc stands in for time.Now so shared's "@sharer · 3d ago" rows are

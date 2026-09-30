@@ -1,5 +1,5 @@
 // Package update implements the daily release-check notice (plan Task 14):
-// at most once per 24h, check GitHub for the newest cli/v* tag and print an
+// at most once per 24h, check GitHub for the newest vX.Y.Z release and print an
 // upgrade hint to stderr after the command's own output.
 package update
 
@@ -22,13 +22,13 @@ const CheckInterval = 24 * time.Hour
 // on by more than this.
 const CheckTimeout = 2 * time.Second
 
-// releasesPath is GitHub's releases-list endpoint for this repo. The CLI
-// lives in a subdirectory (cli/) of the main markist repo, so its releases
-// are tagged cli/vX.Y.Z alongside the web app's own tags.
-const releasesPath = "/repos/jmbataller/markist/releases"
+// releasesPath is GitHub's releases-list endpoint for the public
+// pragmatico/markist-cli repo, where the module lives at the root and each
+// release is tagged with a bare vX.Y.Z.
+const releasesPath = "/repos/pragmatico/markist-cli/releases"
 
-// tagPrefix identifies a CLI release tag among the repo's other tags.
-const tagPrefix = "cli/v"
+// tagPrefix identifies a CLI release tag among any other tags in the repo.
+const tagPrefix = "v"
 
 // defaultAPIBaseURL is the real GitHub API; tests override it with an
 // httptest server via Check's apiBaseURL parameter.
@@ -68,7 +68,7 @@ func Skip(jsonFlag, interactive bool, getenv func(string) string) bool {
 	return false
 }
 
-// Check queries the GitHub releases list for the newest cli/v* tag and
+// Check queries the GitHub releases list for the newest vX.Y.Z tag and
 // compares it against currentVersion. apiBaseURL empty means the real
 // GitHub API; tests point it at an httptest server. The call is bounded by
 // CheckTimeout regardless of the context passed in.
@@ -142,7 +142,7 @@ type release struct {
 	Prerelease bool   `json:"prerelease"`
 }
 
-// newestCLIVersion picks the highest-semver cli/v* tag among releases,
+// newestCLIVersion picks the highest-semver vX.Y.Z tag among releases,
 // ignoring drafts and pre-releases -- neither is something to nudge a user
 // towards installing.
 func newestCLIVersion(releases []release) (string, [3]int, bool) {

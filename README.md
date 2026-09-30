@@ -82,91 +82,33 @@ mismatch. `install.sh` installs to `/usr/local/bin` if writable, else
 `~/.local/bin`; `install.ps1` installs to `%LOCALAPPDATA%\Programs\markist`
 and adds it to the user `PATH`.
 
-Once the Homebrew tap exists (see "Pending manual steps" below):
+Homebrew:
 
 ```bash
 brew install pragmatico/tap/markist-cli
 ```
 
-`go install github.com/pragmatico/markist-cli/cmd/markist@latest` is the
-fallback install path for anyone with a Go toolchain -- the `/guide` page
-(`src/app/guide/page.tsx`, `id="cli"` section, added in Task 14) already
-covers this same command on the web side.
+`go install github.com/pragmatico/markist-cli/cmd/markist@latest` (Go 1.25+)
+is the fallback install path for anyone with a Go toolchain -- the
+[markist.xyz guide](https://markist.xyz/guide#cli) covers the same command.
 
 ## Release
 
-Tagging `cli/vX.Y.Z` on the main repo triggers
-`.github/workflows/cli-release.yml`, which runs GoReleaser (`.goreleaser.yaml`)
-from `cli/` to cross-compile linux/darwin/windows (amd64+arm64), generate man
-pages and shell completions, and publish a GitHub Release plus a Homebrew
-cask update in `pragmatico/homebrew-tap`.
+This folder is developed inside the private Markist monorepo and mirrored
+to the public [`pragmatico/markist-cli`](https://github.com/pragmatico/markist-cli)
+repo on every push to `main` that touches it. The module lives at that
+repo's root, so a release is a bare semver tag there:
 
-### Tag handling spike -- verified outcome
+```bash
+git tag v0.1.0 && git push origin v0.1.0   # in pragmatico/markist-cli
+```
 
-`go install` of a module living in a repo subdirectory needs the
-path-prefixed `cli/vX.Y.Z` tag, but GoReleaser OSS expects a bare semver tag
-and has no monorepo support (`monorepo.tag_prefix` is Pro-only -- confirmed
-by reading `pkg/config/config.go` in the installed `v2.18.2`: the struct
-doesn't exist in this build at all).
+The tag triggers `.github/workflows/cli-release.yml`, which runs GoReleaser
+(`.goreleaser.yaml`) to cross-compile linux/darwin/windows (amd64+arm64),
+generate man pages and shell completions, and publish a GitHub Release plus
+a Homebrew cask update in `pragmatico/homebrew-tap`. The same `vX.Y.Z` tag is
+the Go module version `go install` resolves, and the release `markist`'s
+daily update check and the install scripts look for.
 
-The plan's suggested workaround -- pointing `GORELEASER_CURRENT_TAG` /
-`GORELEASER_PREVIOUS_TAG` at a stripped version of the prefixed tag -- **does
-not hold up**, verified by reading GoReleaser's source rather than just
-running `--snapshot` (snapshot mode skips the exact-match/semver validation
-that actually breaks, so it can't catch this):
-
-- `internal/pipe/release.CreateRelease` always sets the GitHub Release's
-  `TagName` to the literal `ctx.Git.CurrentTag`, and `.Version` (used in
-  every archive/checksum/cask name) is just `strings.TrimPrefix(CurrentTag,
-  "v")`.
-- `internal/pipe/semver.Run` feeds that same raw `ctx.Git.CurrentTag` string
-  to `semver.NewVersion` -- a **hard, non-skippable error** unless
-  `--skip=validate` is also passed.
-- So pointing `GORELEASER_CURRENT_TAG` at the real `cli/v0.1.0` tag (to keep
-  the Release attached to it) fails semver parsing outright (a slash isn't
-  valid semver) and would corrupt every `.Version`-templated name with a
-  literal `/` in it.
-- Stripping it to a bare `v0.1.0` string that **isn't actually a git tag**
-  parses fine, but then `internal/pipe/git.validate`'s `git describe
-  --exact-match --tags --match v0.1.0` fails (`ErrWrongRef`) because no such
-  tag exists -- and even bypassed with `--skip=validate`, the GitHub Release
-  API auto-creates a *new*, disconnected `v0.1.0` tag against the default
-  branch, not the commit that was actually tagged `cli/v0.1.0`.
-
-Neither direction works. **The verified fallback**:
-`.github/workflows/cli-release.yml` mirrors the pushed `cli/vX.Y.Z` tag onto
-a real, bare `vX.Y.Z` tag on the exact same commit (`git tag vX.Y.Z
-cli/vX.Y.Z && git push origin vX.Y.Z`), then drives GoReleaser off *that*
-tag via `GORELEASER_CURRENT_TAG`/`GORELEASER_PREVIOUS_TAG`. Every GoReleaser
-assumption now holds against something real: exact-match validation passes,
-semver parses cleanly, the Release's `TagName` is a tag that actually
-exists, and the cask/archive download URLs GoReleaser builds from `.Tag`
-resolve correctly. Confirmed empirically too: a local `goreleaser release
---snapshot --clean --skip=publish` run produced correct archives (with man
-pages and completions bundled -- verified via `tar -tzf`) and a
-`dist/homebrew/Casks/markist-cli.rb` whose URLs are built from the release
-tag, e.g. `.../releases/download/v0.0.0/markist-cli_#{version}_....tar.gz`.
-
-**Consequence for `install.sh`/`install.ps1` and anyone browsing releases**:
-the CLI's actual GitHub Releases are tagged `vX.Y.Z` (bare), *not*
-`cli/vX.Y.Z` -- the `cli/vX.Y.Z` tag exists only so `go install` can resolve
-the module and has no GitHub Release attached to it directly. The install
-scripts resolve releases by tag shape (`^v[0-9]+\.[0-9]+\.[0-9]+`), so this
-is transparent to end users, but worth knowing if you're looking at the tag
-list and wondering why there are two tags per release.
-
-This was also fixed along the way: the Task 9 scaffold's `homebrew_casks`
-block used the deprecated `binary:` key, which `goreleaser check` now
-flags -- changed to the current `binaries: [markist]` list form.
-
-### Pending manual steps (owner-only, in order)
-
-Nothing above can go live until these four one-time steps happen -- none of
-them can be done from this environment (no credentials for any of them):
-
-Push the first tag: `git tag cli/v0.1.0 && git push origin cli/v0.1.0`.
-   This triggers `.github/workflows/cli-release.yml`, which will itself
-   create and push the mirrored bare `v0.1.0` tag described above.
-
-
-
+The workflow needs a `HOMEBREW_TAP_TOKEN` secret on `pragmatico/markist-cli`:
+a fine-grained PAT with `contents: write` on `pragmatico/homebrew-tap` only.

@@ -5,7 +5,7 @@ package main
 import (
 	"os"
 
-	"github.com/jmbataller/markist/cli/internal/cli"
+	"github.com/pragmatico/markist-cli/internal/cli"
 )
 
 func main() {

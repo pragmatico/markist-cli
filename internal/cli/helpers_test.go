@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/jmbataller/markist/cli/internal/config"
+	"github.com/pragmatico/markist-cli/internal/config"
 )
 
 // withConfigDir points internal/config at a fresh temp directory for the

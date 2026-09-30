@@ -67,7 +67,7 @@ func TestSkip(t *testing.T) {
 func releaseListServer(t *testing.T, body string) *httptest.Server {
 	t.Helper()
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/repos/jmbataller/markist/releases" {
+		if r.URL.Path != "/repos/pragmatico/markist-cli/releases" {
 			t.Errorf("unexpected path %s", r.URL.Path)
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -90,7 +90,7 @@ func tagsBody(tags ...string) string {
 }
 
 func TestCheckFindsNewerVersion(t *testing.T) {
-	server := releaseListServer(t, tagsBody("cli/v0.1.0", "cli/v0.3.0", "cli/v0.2.0", "v9.9.9", "other/v5.0.0"))
+	server := releaseListServer(t, tagsBody("v0.1.0", "v0.3.0", "v0.2.0", "nightly-9.9.9", "other/v5.0.0"))
 	defer server.Close()
 
 	result, err := Check(context.Background(), server.Client(), server.URL, "0.2.0")
@@ -109,7 +109,7 @@ func TestCheckFindsNewerVersion(t *testing.T) {
 }
 
 func TestCheckUpToDate(t *testing.T) {
-	server := releaseListServer(t, tagsBody("cli/v0.3.0", "cli/v0.2.0"))
+	server := releaseListServer(t, tagsBody("v0.3.0", "v0.2.0"))
 	defer server.Close()
 
 	result, err := Check(context.Background(), server.Client(), server.URL, "0.3.0")
@@ -125,7 +125,7 @@ func TestCheckAheadOfLatest(t *testing.T) {
 	// A dev build off a future tag, or a pre-release install, shouldn't
 	// claim an "update" is available when the running version is newer
 	// than anything published.
-	server := releaseListServer(t, tagsBody("cli/v0.3.0"))
+	server := releaseListServer(t, tagsBody("v0.3.0"))
 	defer server.Close()
 
 	result, err := Check(context.Background(), server.Client(), server.URL, "0.4.0")
@@ -139,9 +139,9 @@ func TestCheckAheadOfLatest(t *testing.T) {
 
 func TestCheckIgnoresDraftAndPrerelease(t *testing.T) {
 	body := `[
-		{"tag_name": "cli/v0.5.0", "draft": true},
-		{"tag_name": "cli/v0.4.0", "prerelease": true},
-		{"tag_name": "cli/v0.2.0"}
+		{"tag_name": "v0.5.0", "draft": true},
+		{"tag_name": "v0.4.0", "prerelease": true},
+		{"tag_name": "v0.2.0"}
 	]`
 	server := releaseListServer(t, body)
 	defer server.Close()
@@ -156,7 +156,7 @@ func TestCheckIgnoresDraftAndPrerelease(t *testing.T) {
 }
 
 func TestCheckNoCLIReleases(t *testing.T) {
-	server := releaseListServer(t, tagsBody("v1.0.0", "web/v2.0.0"))
+	server := releaseListServer(t, tagsBody("nightly", "web/v2.0.0"))
 	defer server.Close()
 
 	result, err := Check(context.Background(), server.Client(), server.URL, "0.1.0")
@@ -164,14 +164,14 @@ func TestCheckNoCLIReleases(t *testing.T) {
 		t.Fatalf("Check() error = %v", err)
 	}
 	if result.HasUpdate {
-		t.Errorf("HasUpdate = true, want false when no cli/v* release exists")
+		t.Errorf("HasUpdate = true, want false when no vX.Y.Z release exists")
 	}
 }
 
 func TestCheckUnparsableCurrentVersion(t *testing.T) {
 	// "dev" (the default when built without -ldflags) can't be compared,
 	// so Check should report the latest without claiming an update.
-	server := releaseListServer(t, tagsBody("cli/v0.3.0"))
+	server := releaseListServer(t, tagsBody("v0.3.0"))
 	defer server.Close()
 
 	result, err := Check(context.Background(), server.Client(), server.URL, "dev")
@@ -223,7 +223,7 @@ func TestCheckRespectsTimeout(t *testing.T) {
 }
 
 func TestCheckContextCancelled(t *testing.T) {
-	server := releaseListServer(t, tagsBody("cli/v0.3.0"))
+	server := releaseListServer(t, tagsBody("v0.3.0"))
 	defer server.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())

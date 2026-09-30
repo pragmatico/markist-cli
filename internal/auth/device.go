@@ -15,7 +15,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jmbataller/markist/cli/internal/api"
+	"github.com/pragmatico/markist-cli/internal/api"
 )
 
 // DeviceCodeResponse mirrors the response body of
