@@ -28,11 +28,11 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: cli/go.mod
+          go-version-file: go.mod
 
       - name: Derive release tags
         id: tags
-        working-directory: cli
+        working-directory: .
         run: |
           set -euo pipefail
 
@@ -58,7 +58,7 @@ jobs:
           distribution: goreleaser
           version: "~> v2"
           args: release --clean
-          workdir: cli
+          workdir: .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
