@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "id": "bkm_01hxyz1234567890abcdef",
+      "url": "https://example.com/articles/rust-async-runtimes",
+      "title": "A Tour of Rust Async Runtimes",
+      "summary": "Compares tokio, async-std and smol, with notes on when each is the better default.",
+      "tags": ["rust", "async"],
+      "readTimeMinutes": 7,
+      "readLater": false,
+      "contentKind": "article",
+      "matchedVia": ["semantic", "tag"],
+      "createdAt": "2026-01-15T12:00:00.000Z"
+    },
+    {
+      "id": "bkm_01hxyz0987654321fedcba",
+      "url": "https://example.com/docs/getting-started",
+      "title": null,
+      "summary": null,
+      "tags": [],
+      "readTimeMinutes": null,
+      "readLater": true,
+      "contentKind": null,
+      "matchedVia": [],
+      "createdAt": "2026-02-01T09:30:00.000Z"
+    }
+  ],
+  "total": 2,
+  "truncated": false
+}

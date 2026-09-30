@@ -1,0 +1,115 @@
+# GoReleaser config for the Markist CLI (plan Task 15).
+#
+# Tag handling: Go needs the path-prefixed `cli/vX.Y.Z` tag so
+# `go install github.com/jmbataller/markist/cli/cmd/markist@latest` resolves
+# a module living in a repo subdirectory, but GoReleaser OSS expects a bare
+# semver tag (monorepo.tag_prefix is Pro-only, and this install doesn't even
+# expose that config struct -- confirmed by reading pkg/config/config.go).
+#
+# Verified by reading goreleaser v2.18.2's source (not just guessing):
+# `internal/pipe/release.CreateRelease` always sets the GitHub Release's
+# TagName to the literal `ctx.Git.CurrentTag`, and `internal/pipe/semver`
+# feeds that same raw string to `semver.NewVersion` -- a hard, non-skippable
+# error unless `--skip=validate` is also passed. So pointing
+# GORELEASER_CURRENT_TAG at the real `cli/vX.Y.Z` tag (to keep the Release
+# attached to it) breaks semver parsing (slash isn't valid semver) and
+# corrupts every `.Version`-templated name (archive/checksum/cask, which
+# would embed a literal `/`); stripping it to a bare `vX.Y.Z` string that
+# *isn't* a real tag instead fails `git describe --exact-match` in
+# `internal/pipe/git.validate` and makes the GitHub Release API auto-create a
+# new, disconnected `vX.Y.Z` tag against the default branch instead of the
+# commit that was actually released. Neither direction of the plan's
+# suggested env-var trick holds up -- see cli/README.md for the confirmed
+# fallback this file assumes: `.github/workflows/cli-release.yml` mirrors the
+# pushed `cli/vX.Y.Z` tag onto a real, bare `vX.Y.Z` tag on the same commit
+# and drives GoReleaser off that (via GORELEASER_CURRENT_TAG/_PREVIOUS_TAG),
+# so every GoReleaser assumption -- exact-match validation, semver parsing,
+# the Release's TagName, and the cask/archive download URLs it builds from
+# `.Tag` -- lines up against something that's actually real and correct.
+version: 2
+
+project_name: markist-cli
+
+before:
+  hooks:
+    - go mod tidy
+    - sh -c 'mkdir -p dist-extra/completions dist-extra/man'
+    - sh -c 'go run ./cmd/markist completion bash > dist-extra/completions/markist.bash'
+    - sh -c 'go run ./cmd/markist completion zsh > dist-extra/completions/markist.zsh'
+    - sh -c 'go run ./cmd/markist completion fish > dist-extra/completions/markist.fish'
+    - sh -c 'go run ./cmd/markist man --dir dist-extra/man'
+
+builds:
+  - id: markist
+    main: ./cmd/markist
+    binary: markist
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/jmbataller/markist/cli/internal/version.Version={{ .Version }}
+      - -X github.com/jmbataller/markist/cli/internal/version.Commit={{ .Commit }}
+      - -X github.com/jmbataller/markist/cli/internal/version.Date={{ .Date }}
+
+archives:
+  - id: markist
+    ids:
+      - markist
+    name_template: >-
+      markist-cli_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE*
+      - README.md
+      - src: dist-extra/completions/*
+        dst: completions
+      - src: dist-extra/man/*
+        dst: man
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    include:
+      - "^cli"
+
+# Homebrew via homebrew_casks (`brews` is deprecated in GoReleaser >= 2.10).
+# Binaries are unsigned, so the cask needs a postflight hook that strips the
+# quarantine attribute -- otherwise Gatekeeper blocks the first run.
+homebrew_casks:
+  - name: markist-cli
+    repository:
+      owner: pragmatico
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://markist.xyz"
+    description: "Markist CLI -- bookmarks and prompts from your terminal"
+    binaries:
+      - markist
+    completions:
+      bash: completions/markist.bash
+      zsh: completions/markist.zsh
+      fish: completions/markist.fish
+    manpages:
+      - man/markist.1
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/markist"]
+          end
+
+release:
+  name_template: "markist-cli {{ .Version }}"

@@ -1,0 +1,12 @@
+{
+  "id": "bkm_01hxyz1234567890abcdef",
+  "url": "https://example.com/articles/rust-async-runtimes",
+  "title": "A Tour of Rust Async Runtimes",
+  "summary": "Compares tokio, async-std and smol, with notes on when each is the better default.",
+  "tags": ["rust", "async"],
+  "readTimeMinutes": 7,
+  "readLater": false,
+  "contentKind": "article",
+  "matchedVia": ["semantic", "tag"],
+  "createdAt": "2026-01-15T12:00:00.000Z"
+}

@@ -1,0 +1,26 @@
+{
+  "items": [
+    {
+      "shareId": "shr_01hxyzabc1234567890def",
+      "url": "https://example.com/posts/great-write-up",
+      "title": "A Great Write-Up",
+      "summary": "Why this post is worth reading, in two sentences.",
+      "tags": ["reading"],
+      "sharedBy": "sam_reader",
+      "sharedAt": "2026-02-01T09:30:00.000Z",
+      "notes": ["Check out the second section, it's the best part."],
+      "markistUrl": "https://markist.xyz/shared/shr_01hxyzabc1234567890def"
+    },
+    {
+      "shareId": "shr_01hxyzdef0987654321abc",
+      "url": "https://example.com/videos/intro",
+      "title": null,
+      "summary": null,
+      "tags": [],
+      "sharedBy": null,
+      "sharedAt": "2026-02-03T18:45:00.000Z",
+      "notes": [],
+      "markistUrl": "https://markist.xyz/shared/shr_01hxyzdef0987654321abc"
+    }
+  ]
+}
