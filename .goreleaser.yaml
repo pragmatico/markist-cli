@@ -1,31 +1,9 @@
-# GoReleaser config for the Markist CLI (plan Task 15).
+# GoReleaser config for the Markist CLI.
 #
-# Tag handling: Go needs the path-prefixed `cli/vX.Y.Z` tag so
-# `go install github.com/jmbataller/markist/cli/cmd/markist@latest` resolves
-# a module living in a repo subdirectory, but GoReleaser OSS expects a bare
-# semver tag (monorepo.tag_prefix is Pro-only, and this install doesn't even
-# expose that config struct -- confirmed by reading pkg/config/config.go).
-#
-# Verified by reading goreleaser v2.18.2's source (not just guessing):
-# `internal/pipe/release.CreateRelease` always sets the GitHub Release's
-# TagName to the literal `ctx.Git.CurrentTag`, and `internal/pipe/semver`
-# feeds that same raw string to `semver.NewVersion` -- a hard, non-skippable
-# error unless `--skip=validate` is also passed. So pointing
-# GORELEASER_CURRENT_TAG at the real `cli/vX.Y.Z` tag (to keep the Release
-# attached to it) breaks semver parsing (slash isn't valid semver) and
-# corrupts every `.Version`-templated name (archive/checksum/cask, which
-# would embed a literal `/`); stripping it to a bare `vX.Y.Z` string that
-# *isn't* a real tag instead fails `git describe --exact-match` in
-# `internal/pipe/git.validate` and makes the GitHub Release API auto-create a
-# new, disconnected `vX.Y.Z` tag against the default branch instead of the
-# commit that was actually released. Neither direction of the plan's
-# suggested env-var trick holds up -- see cli/README.md for the confirmed
-# fallback this file assumes: `.github/workflows/cli-release.yml` mirrors the
-# pushed `cli/vX.Y.Z` tag onto a real, bare `vX.Y.Z` tag on the same commit
-# and drives GoReleaser off that (via GORELEASER_CURRENT_TAG/_PREVIOUS_TAG),
-# so every GoReleaser assumption -- exact-match validation, semver parsing,
-# the Release's TagName, and the cask/archive download URLs it builds from
-# `.Tag` -- lines up against something that's actually real and correct.
+# Runs in the public pragmatico/markist-cli mirror (see
+# .github/workflows/cli-release.yml), where the Go module lives at the repo
+# root. A bare `vX.Y.Z` tag there is both the Go module version and the semver
+# tag GoReleaser releases from.
 version: 2
 
 project_name: markist-cli
@@ -54,9 +32,9 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/jmbataller/markist/cli/internal/version.Version={{ .Version }}
-      - -X github.com/jmbataller/markist/cli/internal/version.Commit={{ .Commit }}
-      - -X github.com/jmbataller/markist/cli/internal/version.Date={{ .Date }}
+      - -X github.com/pragmatico/markist-cli/internal/version.Version={{ .Version }}
+      - -X github.com/pragmatico/markist-cli/internal/version.Commit={{ .Commit }}
+      - -X github.com/pragmatico/markist-cli/internal/version.Date={{ .Date }}
 
 archives:
   - id: markist
@@ -81,9 +59,6 @@ checksum:
 
 changelog:
   sort: asc
-  filters:
-    include:
-      - "^cli"
 
 # Homebrew via homebrew_casks (`brews` is deprecated in GoReleaser >= 2.10).
 # Binaries are unsigned, so the cask needs a postflight hook that strips the
@@ -91,8 +66,9 @@ changelog:
 homebrew_casks:
   - name: markist-cli
     repository:
-      owner: jmbataller
-      name: markist-cli
+      owner: pragmatico
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: "https://markist.xyz"
     description: "Markist CLI -- bookmarks and prompts from your terminal"
     binaries:
